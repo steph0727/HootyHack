@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "Hooty Hack",
+    "slug": "hooty-hack",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "edu.kennesaw.hootyhack"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0B0B0B",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "package": "edu.kennesaw.hootyhack"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "name": "Hooty Hack",
+      "themeColor": "#FFC629"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-status-bar",
+      "expo-secure-store",
+      "expo-web-browser"
+    ],
+    "scheme": "hootyhack"
+  }
+}

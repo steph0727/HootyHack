@@ -1,0 +1,12 @@
+# Optional: PostgreSQL in Docker (if you don't have Postgres installed locally).
+services:
+  db:
+    image: postgres:16.4
+    environment:
+      POSTGRES_USER: hooty
+      POSTGRES_PASSWORD: hooty
+      POSTGRES_DB: hooty_hack
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+volumes:
+  pgdata:

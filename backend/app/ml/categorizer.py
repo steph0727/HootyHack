@@ -27,11 +27,21 @@ def extract_flyer_text(image_path: Optional[Path]) -> str:
         return ""
     try:
         import pytesseract  # optional dependency
-        from PIL import Image
+        from PIL import Image, ImageOps
 
-        return pytesseract.image_to_string(Image.open(image_path))
+        # Phone photos are often stored sideways with an EXIF rotation tag; apply it so OCR reads
+        # upright text. convert() also turns camera formats like MPO into plain RGB for tesseract.
+        img = ImageOps.exif_transpose(Image.open(image_path)).convert("RGB")
+        img.thumbnail((2400, 2400))  # big phone photos OCR slowly and no better
+        text = pytesseract.image_to_string(img, timeout=30)
     except Exception:
         return ""
+    return clean_text(text)
+
+
+def clean_text(text: str) -> str:
+    """PostgreSQL text columns reject NUL bytes, which OCR and PDF text layers can contain."""
+    return (text or "").replace("\x00", " ").strip()
 
 
 def event_text(name: str, description: str, host: str, flyer_text: str = "") -> str:
@@ -66,12 +76,12 @@ class FlyerCategorizer:
 
 
 def training_examples_from_db(db) -> List[Tuple[str, List[str]]]:
-    """Owl Life-provided categories and student corrections become extra training data."""
+    """Owl Life/admin-provided categories and student corrections become extra training data."""
     from ..models import CategoryFeedback, Event, EventCategory
 
     examples: Dict[int, set] = {}
     removed: Dict[int, set] = {}
-    for ec in db.query(EventCategory).filter(EventCategory.source.in_(["owl_life", "user"])):
+    for ec in db.query(EventCategory).filter(EventCategory.source.in_(["owl_life", "admin", "user"])):
         examples.setdefault(ec.event_id, set()).add(ec.category)
     for fb in db.query(CategoryFeedback):
         (examples if fb.is_correct else removed).setdefault(fb.event_id, set()).add(fb.category)
@@ -85,7 +95,7 @@ def training_examples_from_db(db) -> List[Tuple[str, List[str]]]:
 
 
 def categorize_events(db, events) -> None:
-    """(Re)assign AI categories to the given events. Owl Life and student labels are kept."""
+    """(Re)assign AI categories to the given events. Owl Life, admin and student labels are kept."""
     from ..models import EventCategory
 
     model = FlyerCategorizer().fit(training_examples_from_db(db))

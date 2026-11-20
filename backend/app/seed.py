@@ -1,7 +1,7 @@
 """Seed PostgreSQL with a representative set of KSU club events (sample data, not live Owl Life data).
 
 Dates are relative to the day you run this, so the feed always has upcoming events.
-Also creates a demo student account (credentials are in README.md / DEMO_* env vars).
+Also creates a demo student account, an admin account and a club account (SHPE at KSU) (credentials are in README.md / DEMO_* env vars).
 
 Usage:  python -m app.seed            (add --reset to wipe events, swipes and saves first)
 """
@@ -11,7 +11,7 @@ from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 from .config import CAMPUS_TZ
-from .db import Base, SessionLocal, engine
+from .db import SessionLocal, init_db
 from .flyers import render_flyer
 from .ingest import upsert_events
 from .models import DEFAULT_SETTINGS, Event, Interaction, SavedEvent, User
@@ -21,12 +21,10 @@ OWL_LIFE = "https://owllife.kennesaw.edu/events"
 
 # slug, name, host, description, day offset, start "HH:MM", hours, location, campus, theme, flyer fmt, owl category, rsvp?
 EVENTS = [
-    ("hack-night", "Hack Night: Build & Chill", "ACM at KSU",
-     "Good people. Great ideas. Bring a laptop and a half-finished side project (or start a new one). "
-     "Mentors from ACM will be floating around to help you debug, and there will be pizza and snacks. "
-     "All skill levels are welcome, no experience needed.",
-     1, "18:00", 2, "Atrium · Room J-202", "Marietta", "tech", "png", None, True),
-    ("acm-showcase", "ACM Project Showcase", "ACM at KSU",
+    ("SHPE_Study", "SHPEtinas Study Night", "SHPE at KSU",
+     "Bring your books and brains to get warmed up for finals with a group study session.",
+     1, "18:00", 2, "Atrium · Room J-2120", "Marietta", "tech", "png", None, True),
+    ("acm-showcase", "ACM Project Showcase", "SHPE at KSU",
      "Student teams demo the software engineering projects they built this semester. Vote for your favorite.",
      1, "18:00", 2, "Engineering Technology Center", "Marietta", "tech", "png", "tech", True),
     ("career-fair", "Fall Tech Career Fair", "Career Planning & Development",
@@ -133,7 +131,7 @@ def build_records(now: datetime):
 
 
 def main(reset: bool = False) -> None:
-    Base.metadata.create_all(engine)
+    init_db()
     now = datetime.now(timezone.utc)
     with SessionLocal() as db:
         if reset:
@@ -143,7 +141,7 @@ def main(reset: bool = False) -> None:
             db.commit()
         events = upsert_events(db, build_records(now))
 
-        email = os.getenv("DEMO_EMAIL", "owl.demo@students.kennesaw.edu")
+        email = os.getenv("DEMO_EMAIL", "owl.demo@students.kennesaw.edu").strip().lower()
         password = os.getenv("DEMO_PASSWORD", "hootyhack-demo")
         user = db.query(User).filter_by(email=email).first()
         if not user:
@@ -151,12 +149,25 @@ def main(reset: bool = False) -> None:
                         campus="Both", interests=["tech", "arts", "social"], settings=dict(DEFAULT_SETTINGS))
             db.add(user)
             db.commit()
+        admin_email = os.getenv("ADMIN_EMAIL", "owl.admin@kennesaw.edu").strip().lower()
+        admin_password = os.getenv("ADMIN_PASSWORD", "hootyhack-admin")
+        if not db.query(User).filter_by(email=admin_email).first():
+            db.add(User(email=admin_email, full_name="Owl Life Admin", password_hash=hash_password(admin_password),
+                        role="admin", campus="Both", interests=[], settings=dict(DEFAULT_SETTINGS)))
+            db.commit()
+        club_email = os.getenv("CLUB_EMAIL", "shpe.club@kennesaw.edu").strip().lower()
+        club_password = os.getenv("CLUB_PASSWORD", "hootyhack-club")
+        if not db.query(User).filter_by(email=club_email).first():
+            db.add(User(email=club_email, full_name="SHPE Officer", password_hash=hash_password(club_password),
+                        role="club", club_name="SHPE at KSU", campus="Both", interests=[],
+                        settings=dict(DEFAULT_SETTINGS)))
+            db.commit()
         # Give the demo account a saved past event so Saved > Past isn't empty.
         past = next(e for e in events if e.owl_life_id == "sample-halloween")
         if not db.get(SavedEvent, (user.id, past.id)):
             db.add(SavedEvent(user_id=user.id, event_id=past.id))
             db.commit()
-        print(f"Seeded {len(events)} events. Demo student: {email}")
+        print(f"Seeded {len(events)} events. Demo student: {email}  Admin: {admin_email}  Club (SHPE at KSU): {club_email}")
         for ev in events[:6]:
             print(f"  {ev.name}: " + ", ".join(f"{c.category}({c.source} {c.confidence:.2f})" for c in ev.categories))
 

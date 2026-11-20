@@ -2,7 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
-  ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View,
+  ActivityIndicator, Alert, Image, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -49,14 +49,15 @@ const variants = {
   danger: { btn: { backgroundColor: 'transparent', borderWidth: 1.5, borderColor: colors.danger }, text: { color: colors.danger } },
 };
 
-export function Field({ label, secure, hint, ...props }) {
+export function Field({ label, secure, hint, multiline, ...props }) {
   const [hidden, setHidden] = useState(!!secure);
   return (
     <View style={{ marginBottom: 16 }}>
       <Text style={s.label}>{label}</Text>
-      <View style={s.inputWrap}>
+      <View style={[s.inputWrap, multiline && s.inputWrapMulti]}>
         <TextInput
-          style={s.input}
+          style={[s.input, multiline && s.inputMulti]}
+          multiline={multiline}
           placeholderTextColor="#A39E92"
           secureTextEntry={hidden}
           autoCapitalize="none"
@@ -162,7 +163,7 @@ export function Flyer({ event, style, resizeMode = 'cover' }) {
   if (!uri || failed) {
     return (
       <View style={[style, s.placeholder]}>
-        <Text style={s.placeholderHoot}>HOOTY HACK</Text>
+        <Text style={s.placeholderHoot}>HOOTY SWIPE</Text>
         <Text style={s.placeholderTitle} numberOfLines={4}>{event?.name}</Text>
         <Text style={s.placeholderHost}>{event?.host_organization}</Text>
         <Text style={s.placeholderNote}>
@@ -180,6 +181,15 @@ export function Flyer({ event, style, resizeMode = 'cover' }) {
       accessibilityLabel={`Flyer for ${event?.name}`}
     />
   );
+}
+
+/** Destructive confirm dialog that works on iOS, Android and web. Resolves true if confirmed. */
+export function confirmAction(title, message, confirmLabel = 'Delete') {
+  if (Platform.OS === 'web') return Promise.resolve(window.confirm(`${title}\n\n${message}`));
+  return new Promise((resolve) => Alert.alert(title, message, [
+    { text: 'Cancel', style: 'cancel', onPress: () => resolve(false) },
+    { text: confirmLabel, style: 'destructive', onPress: () => resolve(true) },
+  ], { cancelable: true, onDismiss: () => resolve(false) }));
 }
 
 export function Loading() {
@@ -202,6 +212,8 @@ export const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderWidth: 1.5,
     borderColor: colors.line, borderRadius: radius.md, paddingHorizontal: 16, height: 54,
   },
+  inputWrapMulti: { height: undefined, minHeight: 120, alignItems: 'flex-start', paddingVertical: 12 },
+  inputMulti: { height: undefined, minHeight: 96, textAlignVertical: 'top' },
   input: { flex: 1, fontSize: 16, color: colors.ink, height: '100%', outlineStyle: 'none' },
   show: { fontWeight: '700', color: colors.ink, textDecorationLine: 'underline' },
   error: {

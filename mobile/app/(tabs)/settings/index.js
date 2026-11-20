@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { api } from '../../../src/api';
-import { useAuth } from '../../../src/auth';
+import { isManager, roleLabel, useAuth } from '../../../src/auth';
 import { colors, radius, type } from '../../../src/theme';
 import { Button, Card, ErrorText, LinkRow, Screen, SectionLabel, ToggleRow } from '../../../src/ui';
 
@@ -27,7 +27,7 @@ export default function Settings() {
 
   return (
     <Screen>
-      <Text style={type.eyebrow}>HOOTY HACK</Text>
+      <Text style={type.eyebrow}>HOOTY SWIPE</Text>
       <Text style={[type.h1, { marginTop: 4 }]}>Settings</Text>
 
       <View style={st.profile}>
@@ -36,10 +36,21 @@ export default function Settings() {
           <Text style={st.name} numberOfLines={1}>{user.full_name}</Text>
           <Text style={st.email} numberOfLines={1}>{user.email}</Text>
         </View>
-        <View style={st.role}><Text style={st.roleText}>Student</Text></View>
+        <View style={st.role}><Text style={st.roleText}>{roleLabel(user)}</Text></View>
       </View>
 
       <ErrorText>{error}</ErrorText>
+
+      {isManager(user) ? (
+        <>
+          <SectionLabel>{user.role === 'club' ? 'CLUB' : 'ADMIN'}</SectionLabel>
+          <Card>
+            <LinkRow title={user.role === 'club' ? 'Club dashboard' : 'Manage events'}
+              subtitle={user.role === 'club' ? `Create and edit events for ${user.club_name}` : 'Create and edit event information'}
+              onPress={() => router.push('/admin')} last />
+          </Card>
+        </>
+      ) : null}
 
       <SectionLabel>DISCOVERY PREFERENCES</SectionLabel>
       <Card>
@@ -58,7 +69,7 @@ export default function Settings() {
       </Card>
 
       <Button title="Sign out" variant="outline" style={{ marginTop: 28 }} onPress={signOut} />
-      <Text style={[type.small, { textAlign: 'center', marginTop: 18 }]}>Hooty Hack  ·  Made for Owls</Text>
+      <Text style={[type.small, { textAlign: 'center', marginTop: 18 }]}>Hooty Swipe  ·  Made for Owls</Text>
     </Screen>
   );
 }

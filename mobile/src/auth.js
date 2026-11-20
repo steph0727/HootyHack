@@ -58,6 +58,9 @@ export function AuthProvider({ children }) {
     setUser,
     signIn: async (email, password) => finish(await api.login({ email, password })),
     register: async (body) => finish(await api.register(body)),
+    // Changing the password signs out other sessions; keep this one with the token it returns.
+    changePassword: async (current_password, new_password) =>
+      finish(await api.changePassword({ current_password, new_password })),
     signOut,
   }), [user, ready, signOut]);
 
@@ -65,3 +68,8 @@ export function AuthProvider({ children }) {
 }
 
 export const useAuth = () => useContext(AuthContext);
+
+// Admins manage every event; club accounts manage their own club's events.
+export const isManager = (user) => user?.role === 'admin' || user?.role === 'club';
+export const homePath = (user) => (!user ? '/sign-in' : isManager(user) ? '/admin' : '/discover');
+export const roleLabel = (user) => ({ admin: 'Admin', club: 'Club' }[user?.role] || 'Student');

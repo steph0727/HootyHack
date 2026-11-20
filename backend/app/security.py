@@ -1,3 +1,5 @@
+import hashlib
+import hmac
 from datetime import datetime, timedelta, timezone
 
 import bcrypt
@@ -24,9 +26,16 @@ def verify_password(password: str, password_hash: str) -> bool:
         return False
 
 
-def create_token(user_id: int) -> str:
+def _password_version(user: User) -> str:
+    """Fingerprint of the current password hash. Changing or resetting the password changes it,
+    which signs out every session that was opened with the old password."""
+    return hashlib.sha256(user.password_hash.encode("utf-8")).hexdigest()[:16]
+
+
+def create_token(user: User) -> str:
     now = datetime.now(timezone.utc)
-    payload = {"sub": str(user_id), "iat": now, "exp": now + timedelta(hours=JWT_EXPIRE_HOURS)}
+    payload = {"sub": str(user.id), "pwv": _password_version(user), "iat": now,
+               "exp": now + timedelta(hours=JWT_EXPIRE_HOURS)}
     return jwt.encode(payload, JWT_SECRET, algorithm="HS256")
 
 
@@ -39,8 +48,22 @@ def current_user(
     try:
         payload = jwt.decode(creds.credentials, JWT_SECRET, algorithms=["HS256"])
         user = db.get(User, int(payload["sub"]))
+        version = str(payload["pwv"])
     except (jwt.PyJWTError, KeyError, ValueError):
         raise unauthorized
-    if user is None:
+    if user is None or not hmac.compare_digest(version, _password_version(user)):
         raise unauthorized
+    return user
+
+
+def admin_user(user: User = Depends(current_user)) -> User:
+    if user.role != "admin":
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Only Owl Life admins can do that.")
+    return user
+
+
+def event_manager(user: User = Depends(current_user)) -> User:
+    """Admins manage every event; club accounts manage their own club's events."""
+    if user.role not in ("admin", "club"):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Only admins and club accounts can manage events.")
     return user

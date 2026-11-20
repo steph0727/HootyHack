@@ -11,5 +11,7 @@ pillow==11.0.0
 python-dotenv==1.0.1
 httpx==0.28.1
 pytest==8.3.4
-# Optional: OCR of flyer images for the categorizer (also needs `brew install tesseract`)
-# pytesseract==0.3.13
+python-multipart==0.0.20   # flyer uploads
+pypdfium2==4.30.0          # PDF flyer previews
+# OCR of flyers for the categorizer (also needs `brew install tesseract`)
+pytesseract==0.3.13

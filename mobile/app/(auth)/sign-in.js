@@ -33,12 +33,12 @@ export default function SignIn() {
 
   return (
     <Screen contentStyle={{ paddingTop: 40 }}>
-      <View style={st.hero} accessibilityLabel="Hooty Hack welcome">
-        <Text style={st.owl}>🦉</Text>
-        <Text style={[type.eyebrow, { color: colors.gold }]}>HOOTY HACK</Text>
+      <View style={st.hero} accessibilityLabel="Hooty Swipe welcome">
+        <Text style={st.owl}></Text>
+        <Text style={[type.eyebrow, { color: colors.gold }]}>HOOTY SWIPE</Text>
       </View>
       <Text style={type.h1}>Welcome back, Owl.</Text>
-      <Text style={[type.body, { marginTop: 6, marginBottom: 28 }]}>Sign in to find your next campus thing.</Text>
+      <Text style={[type.body, { marginTop: 6, marginBottom: 28 }]}>Sign in to find your next campus event!</Text>
 
       <ErrorText>{error}</ErrorText>
       <Field

@@ -34,12 +34,14 @@ CREATE TABLE users (
 	full_name VARCHAR(120) NOT NULL, 
 	password_hash VARCHAR(255) NOT NULL, 
 	role VARCHAR(20) NOT NULL, 
+	club_name VARCHAR(200), 
 	campus VARCHAR(20) NOT NULL, 
 	interests VARCHAR(40)[] NOT NULL, 
 	settings JSONB NOT NULL, 
 	created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL, 
 	PRIMARY KEY (id), 
-	CONSTRAINT ck_users_student_only CHECK (role = 'student'), 
+	CONSTRAINT ck_users_role CHECK (role IN ('student','admin','club')), 
+	CONSTRAINT ck_users_club_name CHECK (role <> 'club' OR club_name IS NOT NULL), 
 	CONSTRAINT ck_users_campus CHECK (campus IN ('Kennesaw','Marietta','Both'))
 );
 

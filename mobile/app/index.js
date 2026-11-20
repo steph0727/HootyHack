@@ -1,8 +1,8 @@
 import { Redirect } from 'expo-router';
 
-import { useAuth } from '../src/auth';
+import { homePath, useAuth } from '../src/auth';
 
 export default function Index() {
   const { user } = useAuth();
-  return <Redirect href={user ? '/discover' : '/sign-in'} />;
+  return <Redirect href={homePath(user)} />;
 }

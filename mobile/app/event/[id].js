@@ -109,7 +109,7 @@ function EventInformationScreen() {
           Saving an event is not an RSVP. Register on the host’s page to save your spot.
         </Text>
         {ev.rsvp_url ? (
-          <Button title="RSVP on Owl Life" icon="external-link" onPress={() => open(ev.rsvp_url)} disabled={ev.is_past} />
+          <Button title="RSVP" icon="external-link" onPress={() => open(ev.rsvp_url)} disabled={ev.is_past} />
         ) : (
           <Text style={[type.body, { fontWeight: '700' }]}>No registration needed. Just show up!</Text>
         )}

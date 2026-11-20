@@ -37,7 +37,7 @@ export default function CreateAccount() {
       <Pressable onPress={() => router.back()} accessibilityRole="button" accessibilityLabel="Back" hitSlop={10}>
         <Text style={{ fontSize: 24, color: colors.ink }}>←</Text>
       </Pressable>
-      <Text style={[type.eyebrow, { marginTop: 18 }]}>HOOTY HACK</Text>
+      <Text style={[type.eyebrow, { marginTop: 18 }]}>HOOTY SWIPE</Text>
       <Text style={[type.h1, { marginTop: 6 }]}>Find where you belong.</Text>
       <Text style={[type.body, { marginTop: 6, marginBottom: 22 }]}>One campus. A whole lot of possibilities.</Text>
 

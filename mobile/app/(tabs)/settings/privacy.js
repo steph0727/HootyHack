@@ -32,7 +32,7 @@ export default function Privacy() {
           value={draft.usage_analytics} onValueChange={set('usage_analytics')} last />
       </Card>
       <Text style={[type.small, { marginTop: 8, marginBottom: 20 }]}>
-        Recommendations only use your interests, campus, and swipes in Hooty Hack. Nothing is shared with clubs.
+        Recommendations only use your interests, campus, and swipes in Hooty Swipe. Nothing is shared with clubs.
       </Text>
       <ErrorText>{error}</ErrorText>
       <Button title="Save privacy settings" loading={saving} onPress={async () => {

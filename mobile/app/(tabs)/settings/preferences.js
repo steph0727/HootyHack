@@ -32,7 +32,7 @@ export default function Preferences() {
     <Screen>
       {onboarding ? (
         <View style={{ marginBottom: 8 }}>
-          <Text style={type.eyebrow}>WELCOME TO HOOTY HACK</Text>
+          <Text style={type.eyebrow}>WELCOME TO HOOTY SWIPE</Text>
           <Text style={[type.h1, { marginTop: 6 }]}>What are you into?</Text>
           <Text style={[type.body, { marginTop: 6 }]}>
             Pick a few interests so your Discover feed starts out personal. You can change these anytime.

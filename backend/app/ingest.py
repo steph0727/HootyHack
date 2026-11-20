@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Iterable
 
 from .config import BASE_DIR
-from .db import Base, SessionLocal, engine
+from .db import SessionLocal, init_db
 from .ml.categories import CATEGORIES
 from .ml.categorizer import categorize_events, extract_flyer_text
 from .models import Event, EventCategory
@@ -58,7 +58,7 @@ def upsert_events(db, records: Iterable[dict]):
 
 
 def main(path: str) -> None:
-    Base.metadata.create_all(engine)
+    init_db()
     records = json.loads(Path(path).read_text())
     with SessionLocal() as db:
         n = len(upsert_events(db, records))

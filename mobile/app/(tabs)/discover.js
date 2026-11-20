@@ -1,8 +1,8 @@
+
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-
 import { api } from '../../src/api';
 import { useAuth } from '../../src/auth';
 import SwipeDeck from '../../src/SwipeDeck';
@@ -65,8 +65,12 @@ export default function Discover() {
     <Screen scroll={false} contentStyle={{ paddingBottom: 12 }}>
       <View style={st.header}>
         <View style={{ flex: 1 }}>
-          <Text style={type.eyebrow}>HOOTY HACK</Text>
-          <Text style={[type.h1, { marginTop: 4 }]}>Find your next thing.</Text>
+          <Text style={type.eyebrow}>HOOTY SWIPE</Text>
+         <Text style={[type.h1, { marginTop: 4 }]}>
+          Welcome, {user?.full_name
+            ?.toLowerCase()
+            .replace(/\b\w/g, (letter) => letter.toUpperCase())}!
+        </Text>
         </View>
         <Pressable onPress={() => router.push('/settings/preferences')} style={st.filterBtn}
           accessibilityRole="button" accessibilityLabel="Event filters">
@@ -109,7 +113,7 @@ export default function Discover() {
         )}
       </View>
       {toast ? <View style={st.toast}><Text style={st.toastText}>{toast}</Text></View> : null}
-      <Text style={[type.small, { textAlign: 'center', marginTop: 8 }]}>Made for your life beyond the classroom.</Text>
+      <Text style={[type.small, { textAlign: 'center', marginTop: 8 }]}></Text>
     </Screen>
   );
 }
@@ -122,7 +126,7 @@ function EmptyDeck({ filter, onReset, onSaved, onAll }) {
       <Text style={[type.body, { textAlign: 'center', marginTop: 6, marginBottom: 22 }]}>
         {filter === 'for_you'
           ? 'No more upcoming events right now. Check back soon, or take another look at ones you passed on.'
-          : 'Nothing left for this filter. Try a wider view.'}
+          : ''}
       </Text>
       {filter !== 'for_you' ? <Button title="Show all upcoming" onPress={onAll} style={{ alignSelf: 'stretch', marginBottom: 10 }} /> : null}
       <Button title="See my saved events" variant="gold" onPress={onSaved} style={{ alignSelf: 'stretch', marginBottom: 10 }} />

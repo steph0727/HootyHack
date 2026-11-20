@@ -22,7 +22,7 @@ Campus event discovery for Kennesaw State students. Swipe right to save an Owl L
 cd backend
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 cp .env.example .env            # then set JWT_SECRET
-.venv/bin/python -m app.seed    # sample events, flyers, demo student
+.venv/bin/python -m app.seed    # sample events, flyers, demo student, admin, demo club
 .venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
@@ -39,6 +39,10 @@ npx expo start          # press w for web, i for iOS simulator, a for Android, o
 The app looks for the API on port 8000 of the same machine that runs the Expo dev server, so phones on the same Wi-Fi work. To point it elsewhere, set `EXPO_PUBLIC_API_URL`.
 
 **Demo student:** the seed script creates the account set by `DEMO_EMAIL` / `DEMO_PASSWORD` in `backend/.env.example`. You can also register any `@students.kennesaw.edu` address.
+
+**Admin:** the seed script also creates an admin account: `ADMIN_EMAIL` / `ADMIN_PASSWORD`, defaulting to `owl.admin@kennesaw.edu` / `hootyhack-admin`. Admins land on **Manage events** (`app/admin/`), where they can create, edit, search and delete events, pick categories, upload a flyer (PNG, JPG or PDF) from the device, and preview an event the way students see it. The API for this is under `/admin/events` and returns 403 for students. Register always creates students, so the only ways to make an admin are the seed script or changing `users.role` in the database.
+
+**Club accounts:** from Manage events → **Club accounts**, an admin creates a sign-in for a club (club name, contact name, email, starting password) and shares it with the club. A club account lands on its own dashboard, where it can create, edit, delete and upload flyers for **only** the events whose host matches its club name (case and extra spaces are ignored), so existing events under that name become the club's automatically. Clubs can't change an event's host or manage other accounts, and can change their password under Password. Deleting a club account keeps its events. The seed script creates a demo club account for "SHPE at KSU": `CLUB_EMAIL` / `CLUB_PASSWORD`, defaulting to `shpe.club@kennesaw.edu` / `hootyhack-club`. API: `/admin/club-accounts` and `/admin/clubs` (admins only).
 
 ## Screens (from the Figma file)
 
@@ -77,8 +81,8 @@ No public Owl Life API is assumed. `python -m app.ingest events.json` imports an
 
 - Event reminders and privacy toggles are saved to the account, but notification delivery, calendar sync and location aren't built yet.
 - "Forgot password" shows a message; there's no email reset flow.
-- Flyer OCR runs only if `pytesseract` and the `tesseract` binary are installed.
-- PDF flyers need an image preview (`flyer_preview_url`) to show on cards. The sample data generates one.
+- Flyer OCR needs the `tesseract` binary (`brew install tesseract`). Without it, uploads still work, but the categorizer only reads PDF text layers and the event details.
+- PDF flyers need an image preview (`flyer_preview_url`) to show on cards. Uploaded PDFs get one rendered from page 1.
 
 Hooty Hack — How to Run the App with Expo
 Here's the complete step-by-step process to run your Hooty Hack application locally using FastAPI (backend) and Expo (frontend).

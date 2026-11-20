@@ -4,11 +4,13 @@ import { useCallback, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { api } from '../../src/api';
+import { roleLabel, useAuth } from '../../src/auth';
 import { colors, fmt, fmtTime, radius, type } from '../../src/theme';
 import { Button, Card, ErrorText, Loading, Screen } from '../../src/ui';
 
 export default function Saved() {
   const router = useRouter();
+  const { user } = useAuth();
   const [events, setEvents] = useState(null);
   const [tab, setTab] = useState('upcoming');
   const [error, setError] = useState('');
@@ -34,10 +36,10 @@ export default function Saved() {
     <Screen>
       <View style={st.headRow}>
         <Text style={type.eyebrow}>YOUR CAMPUS, YOUR PLANS</Text>
-        <View style={st.role}><Text style={st.roleText}>Student</Text></View>
+        <View style={st.role}><Text style={st.roleText}>{roleLabel(user)}</Text></View>
       </View>
       <Text style={[type.h1, { marginTop: 4 }]}>Saved events</Text>
-      <Text style={[type.body, { marginTop: 4 }]}>Good plans start with a little saving.</Text>
+      <Text style={[type.body, { marginTop: 4 }]}></Text>
 
       <View style={st.summary} accessibilityLabel="Saved event summary">
         <Text style={[type.eyebrow, { color: colors.gold }]}>YOUR SAVED LINEUP</Text>
@@ -58,7 +60,7 @@ export default function Saved() {
 
       <View style={st.listHead}>
         <Text style={type.h2}>Your lineup</Text>
-        <Text style={type.small}>Soonest first</Text>
+        <Text style={type.small}>Approaching</Text>
       </View>
       <View style={st.tabs} accessibilityRole="tablist">
         {[['upcoming', 'Upcoming', upcoming.length], ['past', 'Past', past.length]].map(([k, label, n]) => (

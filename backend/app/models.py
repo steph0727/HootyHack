@@ -30,14 +30,17 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     full_name: Mapped[str] = mapped_column(String(120))
     password_hash: Mapped[str] = mapped_column(String(255))
-    role: Mapped[str] = mapped_column(String(20), default="student")
+    role: Mapped[str] = mapped_column(String(20), default="student")  # student | admin | club
+    # Club accounts (created by an admin) manage events whose host_organization matches this name.
+    club_name: Mapped[Optional[str]] = mapped_column(String(200))
     campus: Mapped[str] = mapped_column(String(20), default="Kennesaw")
     interests: Mapped[List[str]] = mapped_column(ARRAY(String(40)), default=list)
     settings: Mapped[dict] = mapped_column(JSONB, default=lambda: dict(DEFAULT_SETTINGS))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     __table_args__ = (
-        CheckConstraint("role = 'student'", name="ck_users_student_only"),
+        CheckConstraint("role IN ('student','admin','club')", name="ck_users_role"),
+        CheckConstraint("role <> 'club' OR club_name IS NOT NULL", name="ck_users_club_name"),
         CheckConstraint("campus IN ('Kennesaw','Marietta','Both')", name="ck_users_campus"),
     )
 
@@ -80,7 +83,7 @@ class EventCategory(Base):
     event_id: Mapped[int] = mapped_column(ForeignKey("events.id", ondelete="CASCADE"), primary_key=True)
     category: Mapped[str] = mapped_column(String(40), primary_key=True)
     confidence: Mapped[float] = mapped_column(Float, default=1.0)
-    source: Mapped[str] = mapped_column(String(20), default="ai")  # ai | owl_life | user
+    source: Mapped[str] = mapped_column(String(20), default="ai")  # ai | owl_life | admin | user
 
     event: Mapped[Event] = relationship(back_populates="categories")
 
